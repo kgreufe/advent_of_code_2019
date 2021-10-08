@@ -7,6 +7,8 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
 ```
 
 # Day 1: The Tyranny of the Rocket Equation
@@ -34,3 +36,23 @@ For a mass of `100756`, the fuel required is `33583`.
 The Fuel Counter-Upper needs to know the total fuel requirement. To find it, individually calculate the fuel needed for the mass of each module (your puzzle input), then add together all the fuel values.
 
 What is the sum of the fuel requirements for all of the modules on your spacecraft?
+
+```{r puzzle 1}
+fuel_req_raw <- readr::read_file("Day01_Input.txt")
+
+fuel_req <- 
+  fuel_req_raw %>% 
+  str_split(r"(\n)") %>% 
+  pluck(1) %>% 
+  parse_number() %>% 
+  .[!is.na(.)]
+
+resp1 <- sum((fuel_req %/% 3) - 2)
+
+resp1
+
+```
+
+`3154112`
+
+## Puzzle 2

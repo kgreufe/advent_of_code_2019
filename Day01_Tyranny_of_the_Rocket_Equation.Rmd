@@ -73,6 +73,9 @@ The fuel required by a module of mass 100756 and its fuel is: 33583 + 11192 + 37
 
 What is the sum of the fuel requirements for all of the modules on your spacecraft when also taking into account the mass of the added fuel? (Calculate the fuel requirements for each module separately, then add them all up at the end.)
 
+
+(I initially thought this was just to be done for the total fuel, but it was to be done for individual module in the initial input. I found the description confusing)
+
 ```{r puzzle 2}
 # while loop
 
@@ -99,4 +102,4 @@ fuel_req %>%
 
 ```
 
-1577012 is TOO LOW?
+`4728317`

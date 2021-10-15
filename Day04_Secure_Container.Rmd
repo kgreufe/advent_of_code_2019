@@ -42,27 +42,59 @@ input <- as.character(108457:562041)
 
 ```{r puzzle1}
 
-tic()
+tic("puzzle 1")
 
 # at least two adjacent digits are the same
 input <- input[str_detect(input, "(\\d)\\1")]
 
 # numbers can never decrease
-index <- 
+index1 <- 
   map_lgl(.x = input, 
           .f = ~ str_split(.x, "")[[1]] %>% 
             parse_integer() %>% 
             {. >= lag(., default = 0L)} %>% 
             {all(. == TRUE)} )
 
-answer1 <- input[index]
-
-toc()
+answer1 <- input[index1]
 
 length(answer1)
+
+toc()
 
 ```
 
 `2779` unique possible passwords that match criteria.
 
 ## Puzzle 2
+
+An Elf just remembered one more important detail: the two adjacent matching digits are not part of a larger group of matching digits.
+
+Given this additional criterion, but still ignoring the range rule, the following are now true:
+
+`112233` meets these criteria because the digits never decrease and all repeated digits are exactly two digits long.
+
+`123444` no longer meets the criteria (the repeated `44` is part of a larger group of `444`).
+
+`111122` meets the criteria (even though 1 is repeated more than twice, it still contains a double `22`).
+
+How many different passwords within the range given in your puzzle input meet all of the criteria?
+
+```{r puzzle2}
+
+tic("puzzle 2")
+
+index2 <- 
+  map(.x = answer1, .f = ~ str_split(.x, "")[[1]]) %>% 
+  map(table) %>% 
+  map(~ any(.x == 2)) %>% 
+  unlist()
+
+answer2 <- answer1[index2]
+
+length(answer2)
+
+toc()
+
+```
+
+With this new criteria, `1972` passwords could work

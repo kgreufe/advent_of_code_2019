@@ -103,7 +103,7 @@ puzzle1 <- function(vec) {
     posx <- 0L
     posy <- 0L
     current_row <- 1L
-      
+    
     for (j in seq_along(vec[[i]])) {
       
       step <- vec[[i]][[j]]
@@ -116,12 +116,12 @@ puzzle1 <- function(vec) {
         
         ans[[i]][current_row:(current_row + qty - 1), ] <- 
           tibble(jx:(if_else(dir == "R", 
-                                jx + (qty - 1), 
-                                jx - (qty - 1))), 
+                             jx + (qty - 1), 
+                             jx - (qty - 1))), 
                  rep(posy, qty))
         
         posx <- posx + if_else(dir == "R", qty, -qty)
-          
+        
       } else {
         
         jy <- if_else(dir == "U", posy + 1, posy - 1)
@@ -129,29 +129,72 @@ puzzle1 <- function(vec) {
         ans[[i]][current_row:(current_row + qty - 1), ] <- 
           tibble(rep(posx, qty), 
                  jy:(if_else(dir == "U", 
-                                      jy + (qty - 1), 
-                                      jy - (qty - 1))))
+                             jy + (qty - 1), 
+                             jy - (qty - 1))))
         
         posy <- posy + if_else(dir == "U", qty, -qty)
         
       }
-      
       current_row <- current_row + qty
-     
     }
-    
   }
-  
-  inner_join(ans[[1]], ans[[2]], by = c("x", "y")) %>%
-    mutate(across(.fns = abs)) %>% 
-    rowSums() %>% 
-    min()
+  ans
 }
 
-puzzle1(input)
+answer1 <- puzzle1(input)
+
+inner_join(answer1[[1]], answer1[[2]], by = c("x", "y")) %>%
+  mutate(across(.fns = abs)) %>% 
+  rowSums() %>% 
+  min()
 
 ```
 
 `1195` is the answer to puzzle1
 
 ## Puzzle 2
+
+It turns out that this circuit is very timing-sensitive; you actually need to *minimize the signal delay*.
+
+To do this, calculate the number of steps each wire takes to reach each intersection; choose the intersection where the sum of both wires' steps is lowest. If a wire visits a position on the grid multiple times, use the steps value from the first time it visits that position when calculating the total value of a specific intersection.
+
+The number of steps a wire takes is the total number of grid squares the wire has entered to get to that location, including the intersection being considered. Again consider the example from above:
+
+`...........`
+`.+-----+...`
+`.|.....|...`
+`.|..+--X-+.`
+`.|..|..|.|.`
+`.|.-X--+.|.`
+`.|..|....|.`
+`.|.......|.`
+`.o-------+.`
+`...........`
+
+In the above example, the intersection closest to the central port is reached after 8+5+5+2 = 20 steps by the first wire and 7+6+4+3 = 20 steps by the second wire for a total of 20+20 = 40 steps.
+
+However, the top-right intersection is better: the first wire takes only 8+5+2 = 15 and the second wire takes only 7+6+2 = 15, a total of 15+15 = 30 steps.
+
+Here are the best steps for the extra examples from above:
+
+`R75,D30,R83,U83,L12,D49,R71,U7,L72`
+`U62,R66,U55,R34,D71,R55,D58,R83` = 610 steps
+
+`R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51`
+`U98,R91,D20,R16,D67,R40,U7,R15,U6,R7` = 410 steps
+
+What is the fewest combined steps the wires must take to reach an intersection?
+
+```{r puzzle2}
+answer2 <- 
+  answer1 %>% 
+  map(.f = ~ mutate(.x, step = row_number())) %>% 
+  map(.f = ~ group_by(.x, x, y) %>% summarize(step = min(step), .groups = "drop"))
+
+inner_join(answer2[[1]], answer2[[2]], by = c("x", "y")) %>% 
+  mutate(step_total = step.x + step.y) %>% 
+  pull(step_total) %>% 
+  min()
+```
+
+Fewest steps to an intersection of wires is `91518`

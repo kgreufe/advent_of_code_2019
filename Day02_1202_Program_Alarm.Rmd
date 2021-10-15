@@ -71,6 +71,89 @@ Once you have a working computer, the first step is to restore the gravity assis
 What value is left at position 0 after the program halts?
 
 ```{r read input}
+parse_input <- function(v) {
+  str_split(v, ",")[[1]] %>% 
+    parse_number()
+}
+
+input_raw <- read_file("Day02_input.txt")
+
+input <- parse_input(input_raw)
+input[2:3] <- c(12L, 2L)
+
+test1 <- parse_input("1,9,10,3,2,3,11,0,99,30,40,50")
+test2 <- parse_input("1,0,0,0,99")
+test3 <- parse_input("2,3,0,3,99")
+test4 <- parse_input("2,4,4,5,99,0")
+test5 <- parse_input("1,1,1,4,99,5,6,0,99")
 
 ```
 
+
+```{r puzzle1 functions}
+
+intcode <- function(.vec, .pos) {
+  
+  .intcode <- .vec[.pos]
+  
+  pos <- ( .vec[(.pos + 1):(.pos + 3)] ) + 1
+  
+  if (.intcode == 99) {
+    
+    .vec[(.pos + 1):lengh(.vec)] <- 99L
+     
+  }
+  
+  # addition
+  else if (.intcode == 1) {
+    
+    .vec[pos[3]] <- .vec[pos[1]] + .vec[pos[2]]
+  
+  # multiplication  
+  } else if (.intcode == 2) {
+    
+    .vec[pos[3]] <- .vec[pos[1]] * .vec[pos[2]]
+    
+  }
+
+  return(.vec)
+}
+
+
+puzzle1 <- function(vec) {
+  
+    # every fourth value we look at the intcode
+  for (i in seq(1, length(vec), 4) ) {
+    
+    if (vec[i] == 99) break
+    
+    vec <- intcode(vec, i)
+    
+  }
+  
+  return(vec)
+}
+
+```
+
+```{r puzzle1 test, eval=FALSE}
+test_list <- list(test1, test2, test3, test4, test5)
+
+map(test_list, puzzle1)
+
+```
+
+got the right answer to the tests, but wrong answer to input.
+574684 is TOO LOW
+
+I forgot to process the input first per the instructions...
+
+
+```{r puzzle1}
+answer1 <- puzzle1(input)
+
+answer1[1]
+
+```
+
+`4462686` is the correct answer for puzzle 1

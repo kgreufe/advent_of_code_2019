@@ -58,3 +58,100 @@ Here are a few more examples:
 `U98,R91,D20,R16,D67,R40,U7,R15,U6,R7` = distance 135
 
 What is the Manhattan distance from the central port to the closest intersection?
+
+```{r input}
+test <- c("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
+test <- str_split(test, ",")
+
+
+input_raw <- read_file("Day03_input.txt")
+
+input <- 
+  str_split(input_raw, "\n")[[1]] %>% 
+  .[str_length(.) > 0] %>% # remove blank vectors 
+  str_split(",")
+
+```
+
+Initially tried this by creating a full matrix of all possible points and then marking them as we went through the instructions but, uh, not enough memory on my computer to do that. Which means that's probablyyyy not a great solution. 
+
+Instead, let's just keep track of the set of points where each wire visits in the "grid"
+
+```{r puzzle1}
+
+puzzle1 <- function(vec) {
+  
+  eval_rows <- function(.vec) {
+    .vec %>% 
+      map(str_sub, start = 2L) %>% 
+      map(parse_integer) %>% 
+      map(reduce, `+`) %>% 
+      unlist() %>% 
+      max() 
+  }
+  
+  ans <- vector("list", length(vec))
+  
+  ans <- 
+    ans %>% 
+    map(.f = ~ tibble(x = integer(eval_rows(vec)), 
+                      y = integer(eval_rows(vec)) ) )
+  
+  
+  for (i in seq_along(vec)) {
+    
+    posx <- 0L
+    posy <- 0L
+    current_row <- 1L
+      
+    for (j in seq_along(vec[[i]])) {
+      
+      step <- vec[[i]][[j]]
+      dir <- str_sub(step, end = 1L) 
+      qty <- str_sub(step, start = 2L) %>% parse_integer()
+      
+      if (dir %in% c("L", "R")) {
+        
+        jx <- if_else(dir == "R", posx + 1, posx - 1)
+        
+        ans[[i]][current_row:(current_row + qty - 1), ] <- 
+          tibble(jx:(if_else(dir == "R", 
+                                jx + (qty - 1), 
+                                jx - (qty - 1))), 
+                 rep(posy, qty))
+        
+        posx <- posx + if_else(dir == "R", qty, -qty)
+          
+      } else {
+        
+        jy <- if_else(dir == "U", posy + 1, posy - 1)
+        
+        ans[[i]][current_row:(current_row + qty - 1), ] <- 
+          tibble(rep(posx, qty), 
+                 jy:(if_else(dir == "U", 
+                                      jy + (qty - 1), 
+                                      jy - (qty - 1))))
+        
+        posy <- posy + if_else(dir == "U", qty, -qty)
+        
+      }
+      
+      current_row <- current_row + qty
+     
+    }
+    
+  }
+  
+  inner_join(ans[[1]], ans[[2]], by = c("x", "y")) %>%
+    mutate(across(.fns = abs)) %>% 
+    rowSums() %>% 
+    min()
+}
+
+puzzle1(input)
+
+```
+
+`1195` is the answer to puzzle1
+
+## Puzzle 2

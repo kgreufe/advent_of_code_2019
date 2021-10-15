@@ -45,13 +45,13 @@ input <- as.character(108457:562041)
 tic()
 
 # at least two adjacent digits are the same
-input <- input[str_detect(foo, "(\\d)\\1")]
+input <- input[str_detect(input, "(\\d)\\1")]
 
 # numbers can never decrease
 index <- 
   map_lgl(.x = input, 
           .f = ~ str_split(.x, "")[[1]] %>% 
-            parse_number() %>% 
+            parse_integer() %>% 
             {. >= lag(., default = 0L)} %>% 
             {all(. == TRUE)} )
 
@@ -63,3 +63,6 @@ length(answer1)
 
 ```
 
+`2779` unique possible passwords that match criteria.
+
+## Puzzle 2

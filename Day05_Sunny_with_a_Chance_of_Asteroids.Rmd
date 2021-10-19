@@ -1,0 +1,17 @@
+---
+title: "Day05_Sunny_with_a_Chance_of_Asteroids_AOC_2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tictoc)
+```
+
+# Day 5: Sunny with a Chance of Asteroids
+
+## Puzzle 1

@@ -1,0 +1,17 @@
+---
+title: "Day06_Universal_Orbit_Map_AOC_2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tictoc)
+```
+
+# Day 6: Universal Orbit Map
+
+## Puzzle 1

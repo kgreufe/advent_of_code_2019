@@ -131,17 +131,10 @@ for (i in 1:npixels) {
 # Let's make it print nicely
 
 # make 0's blocks and 1's empty
-<<<<<<< HEAD
 black <- "\u2B1B" # unicode for black block
 white <- "\u2B1C" # unicdoe for white block
 
 puzzle2_block <- if_else(puzzle2 == 0, black, white)
-=======
-block <- "\u2B1B" # unicode for black block
-white <- "\u2B1C" # unicdoe for white block
-
-puzzle2_block <- if_else(puzzle2 == 0, block, white)
->>>>>>> 6a6796d6362618d404d216a454cd5fa7ea06eb26
 
 # adding line breaks so it'll look good when we pass it to the cat function
 map(1:6, ~ puzzle2_block[((.x * 25) - 24):(.x * 25)]) %>% 

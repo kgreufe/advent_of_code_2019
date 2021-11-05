@@ -1,0 +1,44 @@
+---
+title: "Day12_The_N-Body_Problem_AOC_2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+# Day 12: The N-Body Problem
+
+## Puzzle 1
+
+
+```{r tests}
+
+```
+
+
+```{r input}
+
+```
+
+
+# Puzzle 1 ==================================================================
+
+```{r puzzle 1}
+
+```
+
+
+# Puzzle 2 ===============================================================
+
+
+
+```{r puzzle2}
+
+```
+
+

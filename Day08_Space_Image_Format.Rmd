@@ -122,26 +122,97 @@ Best is 11,13 with 210 other asteroids detected:
 
 
 Find the best location for a new monitoring station. How many other asteroids can be detected from that location?
+```{r functions}
+# takes an input and splits each line into a new element of the vector and
+#   finally removes any elements that do not have data (e.g., file ends on line return)
+prep <- function(.x) {
+  .x %>% 
+    str_split("\n") %>% 
+    pluck(1) %>% 
+    .[str_length(.) >= 1]
+}
+```
 
-```{r input, eval=FALSE}
+
+
+```{r tests}
+# answer = 8
+test1 <- read_file(".#..#\n.....\n#####\n....#\n...##\n") %>% prep()
+
+# answer = 33
+test2 <- read_file("......#.#.\n#..#.#....\n..#######.\n.#.#.###..\n.#..#.....\n..#....#.#\n#..#....#.\n.##.#..###\n##...#..#.\n.#....####") %>% prep()
+
+# answer = 35 
+test3 <- read_file("#.#...#.#.\n.###....#.\n.#....#...\n##.#.#.#.#\n....#.#.#.\n.##..###.#\n..#...##..\n..##....##\n......#...\n.####.###.\n") %>% prep()
+
+# answer = 41  
+test4 <- read_file(".#..#..###\n####.###.#\n....###.#.\n..###.##.#\n##.##.#.#.\n....###..#\n..#.#..#.#\n#..#.#.###\n.##...##.#\n.....#.#..\n") %>% prep()
+
+# answer = 210
+test5 <- read_file(".#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##\n") %>% prep()
+```
+
+
+```{r input}
 input_raw <- read_file("Day10_input.txt") 
 
 #remove trailing line return
-input <- 
-  input_raw %>% 
-  str_split("\n") %>% 
-  pluck(1) %>% 
-  .[str_length(.) >= 1]
+input <- prep(input_raw)
+
 ```
 
 
 # Puzzle 1 ==================================================================
 
 ```{r puzzle 1}
+puz1_data <- input
+puz1_width <- str_length(puz1_data[[1]])
 
+puz1 <- 
+  puz1_data %>% 
+  str_c(collapse = "") %>% 
+  str_split("") %>% 
+  pluck(1) %>% 
+  matrix(ncol = puz1_width, byrow = TRUE)
+
+puz1_asteroids <- 
+  tibble(x = vector("integer"), 
+         y = vector("integer"))
+
+for (i in 1:nrow(puz1)) {
+  for (j in 1:ncol(puz1)) {
+    if(puz1[i, j] == "#") {
+      puz1_asteroids <- bind_rows(puz1_asteroids, tibble(x = j, y = i))
+    }
+  }
+}
+
+puz1_answer <- vector("integer", length = nrow(puz1_asteroids))
+
+for (i in 1:nrow(puz1_asteroids)) {
+  
+  xval <- puz1_asteroids[i, ]$x
+  yval <- puz1_asteroids[i, ]$y
+  
+  result <- 
+    puz1_asteroids[-i, ] %>% 
+    # atan2 (arctangent function) will give angle in radians for x, y positions in cartesian plane
+    mutate(atan = atan2(x - xval, y - yval) ) %>% 
+      pull(atan) %>% 
+      unique() %>% 
+      length()
+  
+  puz1_answer[i] <- result
+  
+} 
+
+best_loc <- puz1_asteroids[which(puz1_answer == max(puz1_answer)), ]
+
+print(best_loc)
+max(puz1_answer)
 ```
 
-
+`344` asteroids can be seen from the best monitoring location (x = 31, y = 35).
 
 
 # Puzzle 2 ===============================================================

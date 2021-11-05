@@ -197,30 +197,123 @@ Energy after 100 steps:
 
 What is the *total energy* in the system after simulating the moons given in your scan for *1000 steps*?
 
+```{r custom functions}
+parse_input <- function(.x) {
+  .x <- 
+    .x %>% 
+    str_replace_all("<|>|.=|( )", "") %>% 
+    read_csv(col_names = FALSE, col_types = cols(.default = "i"))
+  
+  names(.x) <- c("posx", "posy", "posz")
+  
+  .x <- mutate(.x, 
+               moon = letters[1:4], 
+               velx = 0L, 
+               vely = 0L, 
+               velz = 0L) %>% 
+    relocate(moon)
+  
+  return(.x)
+}
+```
+
+
 ```{r tests}
 test1 <- "<x=-1, y=0, z=2>
 <x=2, y=-10, z=-7>
 <x=4, y=-8, z=8>
-<x=3, y=5, z=-1>"
+<x=3, y=5, z=-1>"%>% 
+  parse_input()
 
 test2 <- "<x=-8, y=-10, z=0>
 <x=5, y=5, z=10>
 <x=2, y=-7, z=3>
-<x=9, y=-8, z=-3>"
+<x=9, y=-8, z=-3>" %>% 
+  parse_input()
 ```
 
 
 ```{r input}
+input_raw <- read_file("Day12_input.txt")
 
+input <- parse_input(input_raw)
 ```
 
 
 # Puzzle 1 Solve
 
 ```{r puzzle 1}
+puz1 <- input
+
+velocity <- function(moon, others) {
+  map_int(others, 
+          ~ case_when(near(.x, moon) ~ 0L, 
+                      .x > moon ~ 1L, 
+                      .x < moon ~ -1L)) %>% 
+    sum()
+}
+
+moon_step <- function(.df) {
+  
+  temp <- .df
+  
+  for (i in seq_along(.df$moon)) {
+    
+    moonx <- temp[i, "posx"][[1]]
+    othersx <- temp[-i, "posx"][[1]]
+    
+    moony <- temp[i, "posy"][[1]]
+    othersy <- temp[-i, "posy"][[1]]
+    
+    moonz <- temp[i, "posz"][[1]]
+    othersz <- temp[-i, "posz"][[1]]
+    
+    .df[i, "velx"] <- temp[i, "velx"][[1]] + velocity(moonx, othersx)
+    .df[i, "vely"] <- temp[i, "vely"][[1]] + velocity(moony, othersy)
+    .df[i, "velz"] <- temp[i, "velz"][[1]] + velocity(moonz, othersz)
+    
+  }
+  
+  
+  .df[, "posx"] <- .df[, "posx"][[1]] + .df[, "velx"][[1]]
+  .df[, "posy"] <- .df[, "posy"][[1]] + .df[, "vely"][[1]]
+  .df[, "posz"] <- .df[, "posz"][[1]] + .df[, "velz"][[1]]
+  
+  return(.df)
+}
+
+moon_eval <- function(.df_initial = puz1, steps) {
+  
+  i <- 0L
+  
+  while (i < steps) {
+    
+    .df_initial <- moon_step(.df = .df_initial)
+    
+    i <- i + 1L
+  }
+  
+  return(.df_initial)
+}
+
+
+calc_energy <- function(.df) {
+  .df[, -1] %>% # first column is moon name
+    mutate(across(.fns = abs)) %>% 
+    rowwise() %>% 
+    mutate(pot = sum(c_across(starts_with("pos"))), 
+           kin = sum(c_across(starts_with("vel"))), 
+           tot = pot * kin) %>% 
+    pluck("tot") %>% 
+    sum()
+}
+
+moon_eval(steps = 1000) %>% 
+  calc_energy()
 
 ```
 
+After 1,000 steps, there is `14907` energy in my input.
 
 # Puzzle 2 
 

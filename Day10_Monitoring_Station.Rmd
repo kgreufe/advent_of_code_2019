@@ -1,0 +1,225 @@
+---
+title: "Day10_Monitoring_Station_AOC_2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+# Day 10: Monitoring Station
+
+## Puzzle 1
+
+You fly into the asteroid belt and reach the Ceres monitoring station. The Elves here have an emergency: they're having trouble tracking all of the asteroids and can't be sure they're safe.
+
+The Elves would like to build a new monitoring station in a nearby area of space; they hand you a map of all of the asteroids in that region (your puzzle input).
+
+The map indicates whether each position is empty (.) or contains an asteroid (#). The asteroids are much smaller than they appear on the map, and every asteroid is exactly in the center of its marked position. The asteroids can be described with X,Y coordinates where X is the distance from the left edge and Y is the distance from the top edge (so the top-left corner is 0,0 and the position immediately to its right is 1,0).
+
+Your job is to figure out which asteroid would be the best place to build a *new monitoring station*. A monitoring station can *detect* any asteroid to which it has *direct line of sight* - that is, there cannot be another asteroid *exactly* between them. This line of sight can be at any angle, not just lines aligned to the grid or diagonally. The *best* location is the asteroid that can *detect the largest number* of other asteroids.
+
+For example, consider the following map:
+
+`.#..#`
+`.....`
+`#####`
+`....#`
+`...##`
+
+The best location for a new monitoring station on this map is the highlighted asteroid at *3,4* because it can detect 8 asteroids, more than any other location. (The only asteroid it cannot detect is the one at 1,0; its view of this asteroid is blocked by the asteroid at 2,2.) All other asteroids are worse locations; they can detect 7 or fewer other asteroids. Here is the number of other asteroids a monitoring station on each asteroid could detect:
+
+`.7..7`
+`.....`
+`67775`
+`....7`
+`...87`
+
+Here is an asteroid (#) and some examples of the ways its line of sight might be blocked. If there were another asteroid at the location of a capital letter, the locations marked with the corresponding lowercase letter would be blocked and could not be detected:
+
+`#.........`
+`...A......`
+`...B..a...`
+`.EDCG....a`
+`..F.c.b...`
+`.....c....`
+`..efd.c.gb`
+`.......c..`
+`....f...c.`
+`...e..d..c`
+
+Here are some larger examples:
+
+
+Best is 5,8 with 33 other asteroids detected:
+
+`......#.#.`
+`#..#.#....`
+`..#######.`
+`.#.#.###..`
+`.#..#.....`
+`..#....#.#`
+`#..#....#.`
+`.##.#..###`
+`##...#..#.`
+`.#....####`
+
+
+Best is 1,2 with 35 other asteroids detected:
+
+`#.#...#.#.`
+`.###....#.`
+`.#....#...`
+`##.#.#.#.#`
+`....#.#.#.`
+`.##..###.#`
+`..#...##..`
+`..##....##`
+`......#...`
+`.####.###.`
+
+
+Best is 6,3 with 41 other asteroids detected:
+
+`.#..#..###`
+`####.###.#`
+`....###.#.`
+`..###.##.#`
+`##.##.#.#.`
+`....###..#`
+`..#.#..#.#`
+`#..#.#.###`
+`.##...##.#`
+`.....#.#..`
+
+
+Best is 11,13 with 210 other asteroids detected:
+
+`.#..##.###...#######`
+`##.############..##.`
+`.#.######.########.#`
+`.###.#######.####.#.`
+`#####.##.#.##.###.##`
+`..#####..#.#########`
+`####################`
+`#.####....###.#.#.##`
+`##.#################`
+`#####.##.###..####..`
+`..######..##.#######`
+`####.##.####...##..#`
+`.#####..#.######.###`
+`##...#.##########...`
+`#.##########.#######`
+`.####.#.###.###.#.##`
+`....##.##.###..#####`
+`.#.#.###########.###`
+`#.#.#.#####.####.###`
+`###.##.####.##.#..##`
+
+
+Find the best location for a new monitoring station. How many other asteroids can be detected from that location?
+```{r functions}
+# takes an input and splits each line into a new element of the vector and
+#   finally removes any elements that do not have data (e.g., file ends on line return)
+prep <- function(.x) {
+  .x %>% 
+    str_split("\n") %>% 
+    pluck(1) %>% 
+    .[str_length(.) >= 1]
+}
+```
+
+
+
+```{r tests}
+# answer = 8
+test1 <- read_file(".#..#\n.....\n#####\n....#\n...##\n") %>% prep()
+
+# answer = 33
+test2 <- read_file("......#.#.\n#..#.#....\n..#######.\n.#.#.###..\n.#..#.....\n..#....#.#\n#..#....#.\n.##.#..###\n##...#..#.\n.#....####") %>% prep()
+
+# answer = 35 
+test3 <- read_file("#.#...#.#.\n.###....#.\n.#....#...\n##.#.#.#.#\n....#.#.#.\n.##..###.#\n..#...##..\n..##....##\n......#...\n.####.###.\n") %>% prep()
+
+# answer = 41  
+test4 <- read_file(".#..#..###\n####.###.#\n....###.#.\n..###.##.#\n##.##.#.#.\n....###..#\n..#.#..#.#\n#..#.#.###\n.##...##.#\n.....#.#..\n") %>% prep()
+
+# answer = 210
+test5 <- read_file(".#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##\n") %>% prep()
+```
+
+
+```{r input}
+input_raw <- read_file("Day10_input.txt") 
+
+#remove trailing line return
+input <- prep(input_raw)
+
+```
+
+
+# Puzzle 1 ==================================================================
+
+```{r puzzle 1}
+puz1_data <- input
+puz1_width <- str_length(puz1_data[[1]])
+
+puz1 <- 
+  puz1_data %>% 
+  str_c(collapse = "") %>% 
+  str_split("") %>% 
+  pluck(1) %>% 
+  matrix(ncol = puz1_width, byrow = TRUE)
+
+puz1_asteroids <- 
+  tibble(x = vector("integer"), 
+         y = vector("integer"))
+
+for (i in 1:nrow(puz1)) {
+  for (j in 1:ncol(puz1)) {
+    if(puz1[i, j] == "#") {
+      puz1_asteroids <- bind_rows(puz1_asteroids, tibble(x = j, y = i))
+    }
+  }
+}
+
+puz1_answer <- vector("integer", length = nrow(puz1_asteroids))
+
+for (i in 1:nrow(puz1_asteroids)) {
+  
+  xval <- puz1_asteroids[i, ]$x
+  yval <- puz1_asteroids[i, ]$y
+  
+  result <- 
+    puz1_asteroids[-i, ] %>% 
+    # atan2 (arctangent function) will give angle in radians for x, y positions in cartesian plane
+    mutate(atan = atan2(x - xval, y - yval) ) %>% 
+      pull(atan) %>% 
+      unique() %>% 
+      length()
+  
+  puz1_answer[i] <- result
+  
+} 
+
+best_loc <- puz1_asteroids[which(puz1_answer == max(puz1_answer)), ]
+
+print(best_loc)
+max(puz1_answer)
+```
+
+`344` asteroids can be seen from the best monitoring location (x = 31, y = 35).
+
+
+# Puzzle 2 ===============================================================
+
+
+```{r puzzle2}
+
+```
+
+

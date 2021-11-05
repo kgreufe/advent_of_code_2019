@@ -1,5 +1,5 @@
 ---
-title: "Day10_Monitoring_Station_AOC_2019"
+title: "Day08_Space_Image_Format_AOC_2019"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -9,217 +9,140 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(tictoc)
 ```
 
-# Day 10: Monitoring Station
+# Day 8: Space Image Format
 
 ## Puzzle 1
 
-You fly into the asteroid belt and reach the Ceres monitoring station. The Elves here have an emergency: they're having trouble tracking all of the asteroids and can't be sure they're safe.
+The Elves' spirits are lifted when they realize you have an opportunity to reboot one of their Mars rovers, and so they are curious if you would spend a brief sojourn on Mars. You land your ship near the rover.
 
-The Elves would like to build a new monitoring station in a nearby area of space; they hand you a map of all of the asteroids in that region (your puzzle input).
+When you reach the rover, you discover that it's already in the process of rebooting! It's just waiting for someone to enter a BIOS password. The Elf responsible for the rover takes a picture of the password (your puzzle input) and sends it to you via the Digital Sending Network.
 
-The map indicates whether each position is empty (.) or contains an asteroid (#). The asteroids are much smaller than they appear on the map, and every asteroid is exactly in the center of its marked position. The asteroids can be described with X,Y coordinates where X is the distance from the left edge and Y is the distance from the top edge (so the top-left corner is 0,0 and the position immediately to its right is 1,0).
+Unfortunately, images sent via the Digital Sending Network aren't encoded with any normal encoding; instead, they're encoded in a special Space Image Format. None of the Elves seem to remember why this is the case. They send you the instructions to decode it.
 
-Your job is to figure out which asteroid would be the best place to build a *new monitoring station*. A monitoring station can *detect* any asteroid to which it has *direct line of sight* - that is, there cannot be another asteroid *exactly* between them. This line of sight can be at any angle, not just lines aligned to the grid or diagonally. The *best* location is the asteroid that can *detect the largest number* of other asteroids.
+Images are sent as a series of digits that each represent the color of a single pixel. The digits fill each row of the image left-to-right, then move downward to the next row, filling rows top-to-bottom until every pixel of the image is filled.
 
-For example, consider the following map:
+Each image actually consists of a series of identically-sized layers that are filled in this way. So, the first digit corresponds to the top-left pixel of the first layer, the second digit corresponds to the pixel to the right of that on the same layer, and so on until the last digit, which corresponds to the bottom-right pixel of the last layer.
 
-`.#..#`
-`.....`
-`#####`
-`....#`
-`...##`
+For example, given an image 3 pixels wide and 2 pixels tall, the image data 123456789012 corresponds to the following image layers:
 
-The best location for a new monitoring station on this map is the highlighted asteroid at *3,4* because it can detect 8 asteroids, more than any other location. (The only asteroid it cannot detect is the one at 1,0; its view of this asteroid is blocked by the asteroid at 2,2.) All other asteroids are worse locations; they can detect 7 or fewer other asteroids. Here is the number of other asteroids a monitoring station on each asteroid could detect:
+`Layer 1: 123`
+`         456`
+`            `
+`Layer 2: 789`
+`         012`
 
-`.7..7`
-`.....`
-`67775`
-`....7`
-`...87`
+The image you received is *25 pixels wide and 6 pixels tall*.
 
-Here is an asteroid (#) and some examples of the ways its line of sight might be blocked. If there were another asteroid at the location of a capital letter, the locations marked with the corresponding lowercase letter would be blocked and could not be detected:
+To make sure the image wasn't corrupted during transmission, the Elves would like you to find the layer that contains the *fewest 0 digits*. 
 
-`#.........`
-`...A......`
-`...B..a...`
-`.EDCG....a`
-`..F.c.b...`
-`.....c....`
-`..efd.c.gb`
-`.......c..`
-`....f...c.`
-`...e..d..c`
-
-Here are some larger examples:
-
-
-Best is 5,8 with 33 other asteroids detected:
-
-`......#.#.`
-`#..#.#....`
-`..#######.`
-`.#.#.###..`
-`.#..#.....`
-`..#....#.#`
-`#..#....#.`
-`.##.#..###`
-`##...#..#.`
-`.#....####`
-
-
-Best is 1,2 with 35 other asteroids detected:
-
-`#.#...#.#.`
-`.###....#.`
-`.#....#...`
-`##.#.#.#.#`
-`....#.#.#.`
-`.##..###.#`
-`..#...##..`
-`..##....##`
-`......#...`
-`.####.###.`
-
-
-Best is 6,3 with 41 other asteroids detected:
-
-`.#..#..###`
-`####.###.#`
-`....###.#.`
-`..###.##.#`
-`##.##.#.#.`
-`....###..#`
-`..#.#..#.#`
-`#..#.#.###`
-`.##...##.#`
-`.....#.#..`
-
-
-Best is 11,13 with 210 other asteroids detected:
-
-`.#..##.###...#######`
-`##.############..##.`
-`.#.######.########.#`
-`.###.#######.####.#.`
-`#####.##.#.##.###.##`
-`..#####..#.#########`
-`####################`
-`#.####....###.#.#.##`
-`##.#################`
-`#####.##.###..####..`
-`..######..##.#######`
-`####.##.####...##..#`
-`.#####..#.######.###`
-`##...#.##########...`
-`#.##########.#######`
-`.####.#.###.###.#.##`
-`....##.##.###..#####`
-`.#.#.###########.###`
-`#.#.#.#####.####.###`
-`###.##.####.##.#..##`
-
-
-Find the best location for a new monitoring station. How many other asteroids can be detected from that location?
-```{r functions}
-# takes an input and splits each line into a new element of the vector and
-#   finally removes any elements that do not have data (e.g., file ends on line return)
-prep <- function(.x) {
-  .x %>% 
-    str_split("\n") %>% 
-    pluck(1) %>% 
-    .[str_length(.) >= 1]
-}
-```
-
-
-
-```{r tests}
-# answer = 8
-test1 <- read_file(".#..#\n.....\n#####\n....#\n...##\n") %>% prep()
-
-# answer = 33
-test2 <- read_file("......#.#.\n#..#.#....\n..#######.\n.#.#.###..\n.#..#.....\n..#....#.#\n#..#....#.\n.##.#..###\n##...#..#.\n.#....####") %>% prep()
-
-# answer = 35 
-test3 <- read_file("#.#...#.#.\n.###....#.\n.#....#...\n##.#.#.#.#\n....#.#.#.\n.##..###.#\n..#...##..\n..##....##\n......#...\n.####.###.\n") %>% prep()
-
-# answer = 41  
-test4 <- read_file(".#..#..###\n####.###.#\n....###.#.\n..###.##.#\n##.##.#.#.\n....###..#\n..#.#..#.#\n#..#.#.###\n.##...##.#\n.....#.#..\n") %>% prep()
-
-# answer = 210
-test5 <- read_file(".#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##\n") %>% prep()
-```
-
+On that layer, *what is the number of 1 digits multiplied by the number of 2 digits?*
 
 ```{r input}
-input_raw <- read_file("Day10_input.txt") 
+input_raw <- 
+  read_file("Day08_input.txt") %>% 
+  # file ends in carriage return/new line (\n) -- this removes it
+  str_replace("\n", "") 
 
-#remove trailing line return
-input <- prep(input_raw)
-
+input <- str_split(input_raw, pattern = "")[[1]] %>% as.integer()
 ```
 
 
 # Puzzle 1 ==================================================================
 
 ```{r puzzle 1}
-puz1_data <- input
-puz1_width <- str_length(puz1_data[[1]])
+#150 pixels per layer
+npixels <- 25L * 6L 
 
-puz1 <- 
-  puz1_data %>% 
-  str_c(collapse = "") %>% 
-  str_split("") %>% 
-  pluck(1) %>% 
-  matrix(ncol = puz1_width, byrow = TRUE)
+#100 layers
+nlayers <- length(input) / npixels 
 
-puz1_asteroids <- 
-  tibble(x = vector("integer"), 
-         y = vector("integer"))
+# list of vectors, each element of list is a 150 length vector
+puzzle1 <- map(1:nlayers, ~ input[((.x * 150) - 149):(.x * 150)])
 
-for (i in 1:nrow(puz1)) {
-  for (j in 1:ncol(puz1)) {
-    if(puz1[i, j] == "#") {
-      puz1_asteroids <- bind_rows(puz1_asteroids, tibble(x = j, y = i))
-    }
-  }
-}
+fewest_zeros <- 
+  map(puzzle1, ~ length(.x[.x == 0]) ) %>% 
+  unlist() %>% 
+  {which(. == min(.))}
 
-puz1_answer <- vector("integer", length = nrow(puz1_asteroids))
+puzzle1[[fewest_zeros]] %>% 
+  table() %>% 
+  .[c("1", "2")] %>% 
+  prod()
 
-for (i in 1:nrow(puz1_asteroids)) {
-  
-  xval <- puz1_asteroids[i, ]$x
-  yval <- puz1_asteroids[i, ]$y
-  
-  result <- 
-    puz1_asteroids[-i, ] %>% 
-    # atan2 (arctangent function) will give angle in radians for x, y positions in cartesian plane
-    mutate(atan = atan2(x - xval, y - yval) ) %>% 
-      pull(atan) %>% 
-      unique() %>% 
-      length()
-  
-  puz1_answer[i] <- result
-  
-} 
-
-best_loc <- puz1_asteroids[which(puz1_answer == max(puz1_answer)), ]
-
-print(best_loc)
-max(puz1_answer)
 ```
 
-`344` asteroids can be seen from the best monitoring location (x = 31, y = 35).
+`2176` is the multiplication of the number of 1 digits by the number of 2 digits in the image that has the fewest zero digits. 
 
 
 # Puzzle 2 ===============================================================
 
+Now you're ready to decode the image. The image is rendered by stacking the layers and aligning the pixels with the same positions in each layer. The digits indicate the color of the corresponding pixel: *0 is black, 1 is white, and 2 is transparent*.
+
+The layers are rendered with the first layer in front and the last layer in back. So, if a given position has a transparent pixel in the first and second layers, a black pixel in the third layer, and a white pixel in the fourth layer, the final image would have a black pixel at that position.
+
+For example, given an image 2 pixels wide and 2 pixels tall, the image data 0222112222120000 corresponds to the following image layers:
+
+`Layer 1: 02`
+`         22`
+`           `
+`Layer 2: 11`
+`         22`
+`           `
+`Layer 3: 22`
+`         12`
+`           `
+`Layer 4: 00`
+`         00`
+
+Then, the full image can be found by determining the top visible pixel in each position:
+
+- The top-left pixel is black because the top layer is 0.
+
+- The top-right pixel is white because the top layer is 2 (transparent), but the second layer is 1.
+
+- The bottom-left pixel is white because the top two layers are 2, but the third layer is 1.
+
+- The bottom-right pixel is black because the only visible pixel in that position is 0 (from layer 4).
+
+So, the final image looks like this:
+
+`01`
+`10`
+
+What message is produced after decoding your image?
 
 ```{r puzzle2}
+# using -1 as a placeholder
+puzzle2 <- rep(-1L, npixels)
+
+for (i in 1:npixels) {
+  puzzle2[i] <- 
+    map(puzzle1, ~ .x[i]) %>% 
+    unlist() %>% 
+    { .[min(which(. %in% c(0L, 1L)))] }
+    # figures out which position first matches a zero or 1 and 
+    #  then subsets by that position to return value at that position
+}
+
+
+# Let's make it print nicely
+
+# make 0's blocks and 1's empty
+black <- "\u2B1B" # unicode for black block
+white <- "\u2B1C" # unicdoe for white block
+
+puzzle2_block <- if_else(puzzle2 == 0, black, white)
+
+# adding line breaks so it'll look good when we pass it to the cat function
+map(1:6, ~ puzzle2_block[((.x * 25) - 24):(.x * 25)]) %>% 
+  map(.f = ~ c("\n", .x)) %>% 
+  unlist() %>% 
+  cat()
+
 
 ```
 
-
+Prints out `CYKBY`

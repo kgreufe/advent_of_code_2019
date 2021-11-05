@@ -1,0 +1,251 @@
+[33mcommit ddc23a5334092a3ab9b724236243fbdb579dd960[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Nov 4 19:35:32 2021 -0600
+
+    day10 file create
+
+[33mcommit af11e22bcf0d56f911f9ff9ae4705344a1a96eb6[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Nov 4 19:03:06 2021 -0600
+
+    day10 complete puzzle1
+
+[33mcommit daf81e5cad633a0a5ea0c770a216560892fb662d[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Nov 4 16:13:45 2021 -0600
+
+    day10 puzzle1 text added
+
+[33mcommit 0186297b37946e3b472f401c77da928f37c8a058[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Nov 4 16:04:04 2021 -0600
+
+    create day10 input
+
+[33mcommit 1dd7af89bdbada7023974158341a29376c232045[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Nov 4 16:03:24 2021 -0600
+
+    create day10 file
+
+[33mcommit 22da5183ff70e44e684a418351d31610f5d0ee39[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 29 15:45:58 2021 -0600
+
+    another day08 fix
+
+[33mcommit 805cd236c7e853da2ab9b63a7cd9c8b1642e404f[m
+Merge: 1588d13 6a6796d
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 29 15:45:17 2021 -0600
+
+    fix day08
+    
+    Merge branch 'main' of https://github.com/kgreufe/advent_of_code_2019 into main
+    
+    # Conflicts:
+    #       Day08_Space_Image_Format.Rmd
+
+[33mcommit 1588d13bd320610c791520e11857a710be118f3d[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 29 15:42:21 2021 -0600
+
+    day08 puzzle2 complete
+
+[33mcommit 6a6796d6362618d404d216a454cd5fa7ea06eb26[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 29 15:42:21 2021 -0600
+
+    day08 puzzle2 complete
+
+[33mcommit ecb67836becb7a9232dc02ca4e45f7cc66c22ac2[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 29 14:50:32 2021 -0600
+
+    complete day08 puzzle1
+
+[33mcommit d3eba07a32f7feb63c5a447be0f30436492dada0[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 29 13:49:44 2021 -0600
+
+    create day08 files
+
+[33mcommit 33fce474a508a5ed6e600e6d0c77718a401f9fe5[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 18:04:42 2021 -0600
+
+    add package version info
+
+[33mcommit f0b7814184d89638b899e30b8a6e522469b61cfc[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 17:58:30 2021 -0600
+
+    complete day06 puzzle2
+
+[33mcommit db192894d45b64ca906833325e95ec202648e8f3[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 17:39:47 2021 -0600
+
+    copmlete day06 puzzle1
+
+[33mcommit 35993bc82d015231d571d6815c8449650316e8ac[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 17:09:50 2021 -0600
+
+    create file day06_input
+
+[33mcommit cae77b0a62129d6183b10a5326e8a26dcd72e75e[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 17:09:15 2021 -0600
+
+    create file day06
+
+[33mcommit 3f495afa7600d28ade7d1ef041cafaff8fc26957[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 16:55:00 2021 -0600
+
+    solved puzzle2 day05
+
+[33mcommit 726fd9990581a7da96f41162a57646499762f4a3[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 14:33:16 2021 -0600
+
+    complete puzzle1 day05
+
+[33mcommit 9c411330ad3afeb9f54a615acb4593edf8b0bcba[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 14:33:05 2021 -0600
+
+    day05 input add
+
+[33mcommit b0194ca63dff6546bc38527d50feeef236cb60d2[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Tue Oct 19 12:57:25 2021 -0600
+
+    create file day05
+
+[33mcommit ab050ac222ccb3783ea4a938953d32677165bf6d[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 23:48:07 2021 -0600
+
+    complete puzzle2
+
+[33mcommit bea40cc0b6fb5941d983a9b858bae46883e0c154[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 23:25:36 2021 -0600
+
+    complete puzzle 1
+
+[33mcommit 6352b857dd32f334f5e1474dbe05f38bcfb20595[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 23:12:40 2021 -0600
+
+    create day04
+
+[33mcommit d9ef9f63d401b9843630777950d515a2ff81a1ac[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 22:52:54 2021 -0600
+
+    solve puzzle 2
+
+[33mcommit 7fea80af516e325a0f02b798e5bd189354d3e3f3[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 22:43:17 2021 -0600
+
+    puzzle 1 solved
+
+[33mcommit 30117e486f5f68375067093464eab03871c62bbf[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 19:04:10 2021 -0600
+
+    puzzle 1 text add
+
+[33mcommit 76cd4ff5e50eb6ecf57250ad798bb7c092da744c[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 19:04:00 2021 -0600
+
+    add day03 input
+
+[33mcommit 36df1b7caf39be7daf818673610702fb9494279b[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 18:58:17 2021 -0600
+
+    update yaml titles
+
+[33mcommit 0553237baed3efc94898922e0be088a28e3165cf[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 18:57:20 2021 -0600
+
+    create day03
+
+[33mcommit 016f784a52c6de60659033ff71953a8584491d03[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 18:54:22 2021 -0600
+
+    puzzle2 complete
+
+[33mcommit 327c7ff85b3a28fc301d3a8dada2dd3bda3f13ba[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 18:15:10 2021 -0600
+
+    puzzle1 complete
+
+[33mcommit 39d8e1f0cad7f3502ad9562b49dc6093c4623409[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 16:54:37 2021 -0600
+
+    narrative puzzle 1 add
+
+[33mcommit 9067478a3d2c919620aaba3095f9e4eb716e684c[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 16:54:28 2021 -0600
+
+    add day02 input file
+
+[33mcommit 9d8f2893d02e8284d5a8a35996f73574bf811a76[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 16:11:54 2021 -0600
+
+    create day02 file
+
+[33mcommit cf17b0419a7d49731fd9d5333efb4a633e734fbd[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Thu Oct 14 16:10:42 2021 -0600
+
+    final notes
+
+[33mcommit 2b5131b97c2ac0629e4af9b94c4feae6e3d465f6[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 8 18:08:55 2021 -0600
+
+    complete puzzle 2
+
+[33mcommit f3a6b06b9c79f9b1c853a0220cc09c7e4ac1a7d1[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 8 17:14:33 2021 -0600
+
+    complete puzzle 1
+
+[33mcommit 529cffd3b95e685b6c57c4eb2349a5bc73d565aa[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 8 17:05:08 2021 -0600
+
+    create day 01 files
+
+[33mcommit a0c4923a3c5e7267b00324bff825dd03bbe6e203[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 8 16:56:10 2021 -0600
+
+    update gitignore
+
+[33mcommit 49a7cf2267a95dc78c48cf214173d4d282a6eb5d[m
+Author: kgreufe <kgreufe@gmail.com>
+Date:   Fri Oct 8 16:53:15 2021 -0600
+
+    update gitignore
+
+[33mcommit 5926f4b22a9bb5c044361887b4f23e66c08f09aa[m
+Author: kgreufe <75282723+kgreufe@users.noreply.github.com>
+Date:   Fri Oct 8 16:48:44 2021 -0600
+
+    Initial commit

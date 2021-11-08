@@ -8,6 +8,8 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+options(scipen = 20) # scientific notion setting change
+
 library(tidyverse)
 ```
 
@@ -315,15 +317,138 @@ moon_eval(steps = 1000) %>%
 
 After 1,000 steps, there is `14907` energy in my input.
 
+
+
 # Puzzle 2 
 
+All this drifting around in space makes you wonder about the nature of the universe. Does history really repeat itself? You're curious whether the moons will ever return to a previous state.
 
+Determine the *number of steps* that must occur before all of the moons' *positions and velocities* exactly match a previous point in time.
+
+For example, the first example above takes `2772` steps before they exactly match a previous point in time; it eventually returns to the initial state:
+
+After 0 steps:
+`pos=<x= -1, y=  0, z=  2>, vel=<x=  0, y=  0, z=  0>`
+`pos=<x=  2, y=-10, z= -7>, vel=<x=  0, y=  0, z=  0>`
+`pos=<x=  4, y= -8, z=  8>, vel=<x=  0, y=  0, z=  0>`
+`pos=<x=  3, y=  5, z= -1>, vel=<x=  0, y=  0, z=  0>`
+
+After 2770 steps:
+`pos=<x=  2, y= -1, z=  1>, vel=<x= -3, y=  2, z=  2>`
+`pos=<x=  3, y= -7, z= -4>, vel=<x=  2, y= -5, z= -6>`
+`pos=<x=  1, y= -7, z=  5>, vel=<x=  0, y= -3, z=  6>`
+`pos=<x=  2, y=  2, z=  0>, vel=<x=  1, y=  6, z= -2>`
+
+After 2771 steps:
+`pos=<x= -1, y=  0, z=  2>, vel=<x= -3, y=  1, z=  1>`
+`pos=<x=  2, y=-10, z= -7>, vel=<x= -1, y= -3, z= -3>`
+`pos=<x=  4, y= -8, z=  8>, vel=<x=  3, y= -1, z=  3>`
+`pos=<x=  3, y=  5, z= -1>, vel=<x=  1, y=  3, z= -1>`
+
+After 2772 steps:
+`pos=<x= -1, y=  0, z=  2>, vel=<x=  0, y=  0, z=  0>`
+`pos=<x=  2, y=-10, z= -7>, vel=<x=  0, y=  0, z=  0>`
+`pos=<x=  4, y= -8, z=  8>, vel=<x=  0, y=  0, z=  0>`
+`pos=<x=  3, y=  5, z= -1>, vel=<x=  0, y=  0, z=  0>`
+
+Of course, the universe might last for a *very long time* before repeating. Here's a copy of the second example from above:
+
+`<x=-8, y=-10, z=0>`
+`<x=5, y=5, z=10>`
+`<x=2, y=-7, z=3>`
+`<x=9, y=-8, z=-3>`
+
+This set of initial positions takes `4686774924` steps before it repeats a previous state! Clearly, you might need to find a more efficient way to simulate the universe.
+
+*How many steps does it take* to reach the first state that exactly matches a previous state?
 
 # Puzzle 2 Solve
 
+So, based on how this problem is set up, each axis is independent of the others.  That is, the x-axis position and velocities only ever influence the x-axis values of the other moons.
+
+Also, each output is dependent on the input so the first time any repeats occur should be the initial state. 
+
+One way to solve this might be to figure out how soon each axis' positions and velocities repeat.  Then, once solved for each axis (x, y, z) the solution for the first time the all the positions and velocites repeat for the first time would be the least common multiple of the three axis'.
 
 ```{r puzzle2}
+puz2 <- input
+
+moon_step_puz2 <- function(.df) {
+  
+  temp <- .df
+  
+  for (i in seq_along(.df[[1]])) {
+    
+    moon <- temp[i, 1][[1]]
+    others <- temp[-i, 1][[1]]
+    
+    .df[i, 2] <- temp[i, 2][[1]] + velocity(moon, others)
+  }
+  
+  .df[, 1] <- .df[, 1][[1]] + .df[, 2][[1]]
+  
+  return(.df)
+}
+
+concat_eval <- function(.x) {.x %>% unlist() %>%  str_c(collapse = "")}
+
+
+repeat_axis <- function(.df = puz2, axis) {
+  
+  .df <- select(.df, ends_with(axis)) 
+  
+  result <- concat_eval(.df)
+  
+  i <-  0L
+  match  <-  FALSE
+  
+  while (match == FALSE) {
+    
+    i <- i + 1L
+    
+    .df <- moon_step_puz2(.df = .df)
+    
+    eval <- concat_eval(.df)
+    
+    if (sum(eval == result) > 0) {match <- TRUE}
+  }
+  
+  return(i)
+}
+
+
+rep_x <- repeat_axis(axis = "x")
+rep_y <- repeat_axis(axis = "y")
+rep_z <- repeat_axis(axis = "z")
+
+
+# cross-join and multiply to search for least common multiple
+lcm <- function(a, b) {
+  tibble(axis = c("a", "b"), 
+         value = as.double(c(a, b))) %>% 
+    crossing(n = 1:1e6) %>% 
+    mutate(value = value * n) %>% 
+    count(value) %>% 
+    filter(n >= 2) %>% 
+    arrange(value) %>% 
+    head(1) %>% 
+    pull(1)
+}
+
+# least common multiple of each of two variables, then lcm of those combinations.
+xy <- lcm(rep_x, rep_y)
+xz <- lcm(rep_x, rep_z)
+xyz <- lcm(xy, xz)
+
 
 ```
+
+
+`467081194429464` which is correct. (~467 trillion)
+
+
+First got answer from Wolfram Alpha website, before coding solution in R above via lcm() custom function.  
+
+Not the fastest answer for puzzle 2 and it takes a bit to run, particularly for the "repeat_axis" function, but it gets the correct answer for the puzzle!
 
 

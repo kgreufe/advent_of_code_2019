@@ -1,0 +1,55 @@
+---
+title: "Day14_Space_Stoichiometry_AOC_2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+options(scipen = 20) # scientific notion setting change
+
+library(tidyverse)
+```
+
+# Day 14: Space Stoichiometry
+
+# Puzzle 1
+
+
+
+```{r functions}
+
+```
+
+
+```{r tests}
+
+```
+
+
+```{r input, eval=FALSE}
+input_raw <- read_file("Day14_input.txt")
+
+input <- 
+```
+
+
+# Puzzle 1 Solve
+
+```{r puzzle 1}
+
+```
+
+
+
+# Puzzle 2 
+
+
+
+```{r puzzle2}
+
+```
+
+

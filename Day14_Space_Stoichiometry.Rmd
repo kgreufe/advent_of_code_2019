@@ -106,31 +106,81 @@ Here are some larger examples:
 
 Given the list of reactions in your puzzle input, what is the minimum amount of ORE required to produce exactly 1 FUEL?
 
-```{r functions}
-
+```{r parse input function}
+parse_input <- function(.x) {
+  .x %>% 
+    {str_split(., "\n")[[1]]} %>% 
+    .[str_length(.) > 0] %>% 
+    as_tibble() %>% 
+    separate(col = value, into = c("input", "output"), sep = "=>") %>% 
+    mutate(across(.fns = str_trim)) %>% 
+    separate(col = output, into = c("out_val", "out_label"), sep = " ") %>% 
+    relocate(starts_with("out")) %>% 
+    mutate(input = str_split(input, ",")) %>% 
+    unnest(input) %>% 
+    mutate(across(.fns = str_trim)) %>% 
+    separate(col = input, into = c("in_val", "in_label"), sep = " ") %>% 
+    mutate(across(ends_with("val"), parse_integer))
+}
 ```
 
 
 ```{r tests}
-test1 <- "10 ORE => 10 A
-1 ORE => 1 B
-7 A, 1 B => 1 C
-7 A, 1 C => 1 D
-7 A, 1 D => 1 E
-7 A, 1 E => 1 FUEL"
+test1 <- "10 ORE => 10 A\n1 ORE => 1 B\n7 A, 1 B => 1 C\n7 A, 1 C => 1 D\n7 A, 1 D => 1 E\n7 A, 1 E => 1 FUEL\n" %>% parse_input()
 ```
 
 
-```{r input, eval=FALSE}
+```{r input}
 input_raw <- read_file("Day14_input.txt")
 
-input <- 
+input <- parse_input(input_raw)
 ```
 
 
 # Puzzle 1 Solve
 
 ```{r puzzle 1}
+puz1 <- test1
+
+recipes <- puz1
+ore_labels <- puz1[puz1$in_label == "ORE", ]$out_label %>% unique()
+
+required <- tibble(label = character(), val = integer())
+leftovers <- tibble(label = character(), val = integer())
+
+calc_needed <- function(label, need) {
+  if (need < 0) return(0L)
+  
+  min_make <- unique(recipes[recipes$out_label == label, ]$out_val )
+  
+  if (need <= min_make){
+    calc <- min_make
+  } else if (need %% min_make == 0) {
+    calc <- need / min_make
+  } else {
+    calc <- {need %/% min_make} + 1L
+  }
+  calc
+}
+
+groupem <- function(.df) { count(.df, label, wt = val) }
+
+have <- function(label) { 
+  .x <- leftovers[leftovers$label == label, ]$val 
+  if (length(.x) == 0) return(0L)
+  .x
+}
+
+
+required <- required %>% add_row(label = "FUEL", val = 1L)
+
+required[!(required$label %in% ore_labels), ] %>% 
+  inner_join(recipes, by = c("label" = "out_label")) %>% 
+  rowwise() %>% 
+  mutate(have = have(in_label), 
+         make = calc_needed(label, (val - have)), 
+         add = val * in_val, 
+         leftover = make - add)
 
 ```
 
@@ -145,3 +195,4 @@ input <-
 ```
 
 
+something to do with binary search?

@@ -127,6 +127,10 @@ parse_input <- function(.x) {
 
 ```{r tests}
 test1 <- "10 ORE => 10 A\n1 ORE => 1 B\n7 A, 1 B => 1 C\n7 A, 1 C => 1 D\n7 A, 1 D => 1 E\n7 A, 1 E => 1 FUEL\n" %>% parse_input()
+
+test2 <- "9 ORE => 2 A\n8 ORE => 3 B\n7 ORE => 5 C\n3 A, 4 B => 1 AB\n5 B, 7 C => 1 BC\n4 C, 1 A => 1 CA\n2 AB, 3 BC, 4 CA => 1 FUEL\n" %>% parse_input()
+
+test3 <- "157 ORE => 5 NZVS\n165 ORE => 6 DCFZ\n44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL\n12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ\n179 ORE => 7 PSHF\n177 ORE => 5 HKGWZ\n7 DCFZ, 7 PSHF => 2 XJWVT\n165 ORE => 2 GPVTF\n3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT\n" %>% parse_input()
 ```
 
 
@@ -140,30 +144,35 @@ input <- parse_input(input_raw)
 # Puzzle 1 Solve
 
 ```{r puzzle 1}
-puz1 <- test1
+puz1 <- test3
 
 recipes <- puz1
 ore_labels <- puz1[puz1$in_label == "ORE", ]$out_label %>% unique()
 
 required <- tibble(label = character(), val = integer())
 leftovers <- tibble(label = character(), val = integer())
+# starting step will always be FUEL
+current_step <- tibble(label = "FUEL", val = 1L)
 
 calc_needed <- function(label, need) {
-  if (need < 0) return(0L)
+  if (need <= 0) return(0L)
   
   min_make <- unique(recipes[recipes$out_label == label, ]$out_val )
   
   if (need <= min_make){
     calc <- min_make
   } else if (need %% min_make == 0) {
-    calc <- need / min_make
+    calc <- (need / min_make) * min_make
   } else {
-    calc <- {need %/% min_make} + 1L
+    calc <- ((need %/% min_make) + 1L) * min_make
   }
   calc
 }
 
-groupem <- function(.df) { count(.df, label, wt = val) }
+groupem <- function(.df) { 
+  count(.df, label, wt = val) %>% 
+    rename(val = n)
+}
 
 have <- function(label) { 
   .x <- leftovers[leftovers$label == label, ]$val 
@@ -171,19 +180,89 @@ have <- function(label) {
   .x
 }
 
+runstep <- function(.df) {
+  .df[!(.df$label %in% ore_labels), ] %>% 
+    inner_join(recipes, by = c("label" = "out_label")) %>% 
+    rowwise() %>% 
+    mutate(have = have(in_label), 
+           make = calc_needed(in_label, ((val * in_val) - have)), 
+           add = val * in_val, 
+           leftover = make - add - have)
+}
 
-required <- required %>% add_row(label = "FUEL", val = 1L)
+# current_step %>% 
+#   inner_join(recipes, by = c("label" = "out_label")) %>% 
+#   rowwise() %>% 
+#   mutate(have = have(in_label), 
+#          make = calc_needed(in_label, ((val * in_val) - have)), 
+#          add = val * in_val, 
+#          leftover = make - add - have)
 
-required[!(required$label %in% ore_labels), ] %>% 
-  inner_join(recipes, by = c("label" = "out_label")) %>% 
+# loop through our steps...
+
+while(nrow(current_step) > 0L) {
+  # run step calc
+  step <- runstep(current_step)
+  
+  # add last steps before ore to "required". 
+  # These are the chemicals that can only be made from ORE
+  # then regroup "required" tibble
+  required <- 
+    required %>% 
+    add_row(step[step$in_label %in% ore_labels, ] %>%
+              select(in_label, add) %>% 
+              rename(label = in_label, val = add)) %>% 
+    groupem()
+  
+  # remove any leftovers we used
+  leftovers <- 
+    step[step$have > 0, ] %>% 
+    select(in_label, have) %>% 
+    rename(label = in_label) %>% 
+    right_join(leftovers, by = "label") %>% 
+    mutate(remaining = val - if_else(is.na(have) == TRUE, 0L, as.integer(have))) %>% 
+    select(label, remaining) %>% 
+    rename(val = remaining) %>% 
+    groupem()
+  
+  # add any leftovers to the "leftovers" table
+  leftovers <- 
+    leftovers %>% 
+    add_row(step[step$leftover > 0, ] %>% 
+              select(in_label, leftover) %>% 
+              rename(label = in_label, val = leftover)) %>% 
+    groupem()
+  
+  # simplify our step to same format for next input (label, val)
+  current_step <- 
+    step[!(step$in_label %in% ore_labels), ] %>% 
+    select(in_label, in_val) %>% 
+    rename(label = in_label, val = in_val) %>% 
+    groupem()
+  
+}
+
+calc_ore <- function(needed, need_discrete, ore_input) {
+  
+  # no remainder, just return the equal division
+  if (needed %% need_discrete == 0) {
+    m <- needed / need_discrete
+    # otherwise, integer division plus one
+  } else {
+    m <- (needed %/% need_discrete) + 1
+  }
+  return(m * ore_input)
+}
+
+puz1_answer <- 
+  inner_join(required, recipes, by = c("label" = "out_label")) %>% 
   rowwise() %>% 
-  mutate(have = have(in_label), 
-         make = calc_needed(label, (val - have)), 
-         add = val * in_val, 
-         leftover = make - add)
+  mutate(ore_calc = calc_ore(val, out_val, in_val)) %>% 
+  pull(ore_calc) %>% 
+  sum()
 
+puz1_answer
 ```
-
 
 
 # Puzzle 2 

@@ -1,0 +1,315 @@
+---
+title: ''
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+options(scipen = 20)
+
+library(tidyverse)
+```
+
+# Day 16: Flawed Frequency Transmission
+
+# Puzzle 1 =========================================================
+
+You're 3/4ths of the way through the gas giants. Not only do roundtrip signals to Earth take five hours, but the signal quality is quite bad as well. You can clean up the signal with the *Flawed Frequency Transmission* algorithm, or *FFT*.
+
+As input, FFT takes a list of numbers. In the signal you received (your puzzle input), each number is a single digit: data like `15243` represents the sequence `1`, `5`, `2`, `4`, `3`.
+
+FFT operates in repeated *phases*. In each phase, a new list is constructed with the same length as the input list. This new list is also used as the input for the next phase.
+
+Each element in the new list is built by multiplying every value in the input list by a value in a repeating *pattern* and then adding up the results. So, if the input list were `9, 8, 7, 6, 5` and the pattern for a given element were `1, 2, 3`, the result would be `9*1 + 8*2 + 7*3 + 6*1 + 5*2` (with each input element on the left and each value in the repeating pattern on the right of each multiplication). Then, only the ones digit is kept: `38` becomes `8`, `-17` becomes `7`, and so on.
+
+While each element in the output array uses all of the same input array elements, the actual repeating pattern to use depends on *which output element* is being calculated. The base pattern is `0, 1, 0, -1`. Then, repeat each value in the pattern a number of times equal to the position in the output list being considered. Repeat once for the first element, twice for the second element, three times for the third element, and so on. So, if the third element of the output list is being calculated, repeating the values would produce: `0, 0, 0, 1, 1, 1, 0, 0, 0, -1, -1, -1`.
+
+When applying the pattern, skip the very first value exactly once. (In other words, offset the whole pattern left by one.) So, for the second element of the output list, the actual pattern used would be: `0, 1, 1, 0, 0, -1, -1, 0, 0, 1, 1, 0, 0, -1, -1, ....`
+
+After using this process to calculate each element of the output list, the phase is complete, and the output list of this phase is used as the new input list for the next phase, if any.
+
+Given the input signal `12345678`, below are four phases of FFT. Within each phase, each output digit is calculated on a single line with the result at the far right; each multiplication operation shows the input digit on the left and the pattern value on the right:
+
+```
+Input signal: 12345678
+
+1*1  + 2*0  + 3*-1 + 4*0  + 5*1  + 6*0  + 7*-1 + 8*0  = 4
+1*0  + 2*1  + 3*1  + 4*0  + 5*0  + 6*-1 + 7*-1 + 8*0  = 8
+1*0  + 2*0  + 3*1  + 4*1  + 5*1  + 6*0  + 7*0  + 8*0  = 2
+1*0  + 2*0  + 3*0  + 4*1  + 5*1  + 6*1  + 7*1  + 8*0  = 2
+1*0  + 2*0  + 3*0  + 4*0  + 5*1  + 6*1  + 7*1  + 8*1  = 6
+1*0  + 2*0  + 3*0  + 4*0  + 5*0  + 6*1  + 7*1  + 8*1  = 1
+1*0  + 2*0  + 3*0  + 4*0  + 5*0  + 6*0  + 7*1  + 8*1  = 5
+1*0  + 2*0  + 3*0  + 4*0  + 5*0  + 6*0  + 7*0  + 8*1  = 8
+
+After 1 phase: 48226158
+
+4*1  + 8*0  + 2*-1 + 2*0  + 6*1  + 1*0  + 5*-1 + 8*0  = 3
+4*0  + 8*1  + 2*1  + 2*0  + 6*0  + 1*-1 + 5*-1 + 8*0  = 4
+4*0  + 8*0  + 2*1  + 2*1  + 6*1  + 1*0  + 5*0  + 8*0  = 0
+4*0  + 8*0  + 2*0  + 2*1  + 6*1  + 1*1  + 5*1  + 8*0  = 4
+4*0  + 8*0  + 2*0  + 2*0  + 6*1  + 1*1  + 5*1  + 8*1  = 0
+4*0  + 8*0  + 2*0  + 2*0  + 6*0  + 1*1  + 5*1  + 8*1  = 4
+4*0  + 8*0  + 2*0  + 2*0  + 6*0  + 1*0  + 5*1  + 8*1  = 3
+4*0  + 8*0  + 2*0  + 2*0  + 6*0  + 1*0  + 5*0  + 8*1  = 8
+
+After 2 phases: 34040438
+
+3*1  + 4*0  + 0*-1 + 4*0  + 0*1  + 4*0  + 3*-1 + 8*0  = 0
+3*0  + 4*1  + 0*1  + 4*0  + 0*0  + 4*-1 + 3*-1 + 8*0  = 3
+3*0  + 4*0  + 0*1  + 4*1  + 0*1  + 4*0  + 3*0  + 8*0  = 4
+3*0  + 4*0  + 0*0  + 4*1  + 0*1  + 4*1  + 3*1  + 8*0  = 1
+3*0  + 4*0  + 0*0  + 4*0  + 0*1  + 4*1  + 3*1  + 8*1  = 5
+3*0  + 4*0  + 0*0  + 4*0  + 0*0  + 4*1  + 3*1  + 8*1  = 5
+3*0  + 4*0  + 0*0  + 4*0  + 0*0  + 4*0  + 3*1  + 8*1  = 1
+3*0  + 4*0  + 0*0  + 4*0  + 0*0  + 4*0  + 3*0  + 8*1  = 8
+
+After 3 phases: 03415518
+
+0*1  + 3*0  + 4*-1 + 1*0  + 5*1  + 5*0  + 1*-1 + 8*0  = 0
+0*0  + 3*1  + 4*1  + 1*0  + 5*0  + 5*-1 + 1*-1 + 8*0  = 1
+0*0  + 3*0  + 4*1  + 1*1  + 5*1  + 5*0  + 1*0  + 8*0  = 0
+0*0  + 3*0  + 4*0  + 1*1  + 5*1  + 5*1  + 1*1  + 8*0  = 2
+0*0  + 3*0  + 4*0  + 1*0  + 5*1  + 5*1  + 1*1  + 8*1  = 9
+0*0  + 3*0  + 4*0  + 1*0  + 5*0  + 5*1  + 1*1  + 8*1  = 4
+0*0  + 3*0  + 4*0  + 1*0  + 5*0  + 5*0  + 1*1  + 8*1  = 9
+0*0  + 3*0  + 4*0  + 1*0  + 5*0  + 5*0  + 1*0  + 8*1  = 8
+
+After 4 phases: 01029498
+```
+
+Here are the first eight digits of the final output list after 100 phases for some larger inputs:
+
+`80871224585914546619083218645595` becomes ``24176176`.
+`19617804207202209144916044189917` becomes `73745418`.
+`69317163492948606335995924319873` becomes `52432133`.
+
+After 100 phases of FFT, what are the first eight digits in the final output list?
+
+```{r input}
+test1 <- "12345678"
+test2 <- "80871224585914546619083218645595"
+test3 <- "19617804207202209144916044189917"
+test4 <- "69317163492948606335995924319873"
+input <- read_lines("Day16_input.txt")
+```
+
+
+```{r puzzle 1}
+tictoc::tic("puzzle 1 time:")
+
+# change this variable for what you want to run (tests or input)
+puz1 <- input
+
+pattern <- c(0, 1, 0, -1)
+
+# function to repeat the pattern above
+# nstep is the step we're on, e.g. the third position
+# nlen is the length we need at the end, which is how long the code is we're evaluating
+
+pat_rep <- function(nstep, nlen, pat = pattern) {
+  
+  .r <- map(.x = pat, 
+            .f = ~ rep(.x, nstep)) %>% 
+    unlist() 
+  
+  .r_len <- length(.r)
+  
+  .r <- rep(.r, ((nlen %/% .r_len) + 1) )
+  
+  .r <- tail(.r, -1) # remove first value
+  
+  .r[1:nlen]
+  
+}
+
+
+puz_tibble_create <- function(.puz) {
+
+  .puz %>% 
+  str_split("") %>% 
+  pluck(1) %>% 
+  parse_number() %>% 
+  tibble(v = .)
+  
+}
+
+puz1 <- puz_tibble_create(puz1)
+puz1_n <- length(puz1$v)
+
+
+
+process_phase <- function(.df, .ignore, .pl) {
+
+  # answer vector
+  .a <- vector("double", length = .pl)
+  
+  for (i in seq_along(.df$v)) {
+    .c <- 
+      .df %>% 
+      mutate(mult = pat_rep(i, .pl), 
+             eval = v * mult) %>% 
+      pluck("eval") %>% 
+      sum() %>% 
+      abs() %>% 
+      {. %% 10} # only care about the one's value
+    
+    .a[i] <- .c
+    
+  }
+  
+  tibble(v = .a)
+}
+
+reduce2(.x = 1:100, 
+        .y = rep(puz1_n, 100), 
+        .f = process_phase, 
+        .init = puz1) %>% 
+  pluck(1) %>% 
+  .[1:8] %>% 
+  str_c(collapse = "")
+
+tictoc::toc()
+```
+
+For our input, the answer is `82525123`
+
+
+# Puzzle 2 =========================================================
+
+
+```{r puzzle 2 attempt 1, eval = FALSE}
+tictoc::tic("puzzle 2 time")
+
+# this will never complete...
+
+# change variable here for what we'd like to evaluate
+puz2 <- 
+  test2 %>% 
+  rep(., 10000) %>% 
+  str_c(collapse = "")
+
+offset <- str_sub(puz2, end = 7L)
+
+puz2 <- puz_tibble_create(puz2)
+puz2_n <- length(puz2$v)
+
+puz2_answer <- 
+  reduce2(.x = 1:100, 
+          .y = rep(puz2_n, 100), 
+          .f = process_phase, 
+          .init = puz2) 
+
+  # pluck(1) %>% 
+  # {.[offset:length(.)]}
+
+tictoc::toc()
+```
+
+For part2, because of how our pattern keeps duplicating based on the step we're at, as long as our offset is over half way (halfway + 1) that pattern will only be 0's and 1's. 
+
+For example, for a 10 digit number: starting at 6 we only have a sequence of zero's followed by a sequence of one's.
+```
+[[1]]
+ [1]  1  0 -1  0  1  0 -1  0  1  0
+
+[[2]]
+ [1]  0  1  1  0  0 -1 -1  0  0  1
+
+[[3]]
+ [1]  0  0  1  1  1  0  0  0 -1 -1
+
+[[4]]
+ [1] 0 0 0 1 1 1 1 0 0 0
+
+[[5]]
+ [1] 0 0 0 0 1 1 1 1 1 0
+
+[[6]]
+ [1] 0 0 0 0 0 1 1 1 1 1
+
+[[7]]
+ [1] 0 0 0 0 0 0 1 1 1 1
+
+[[8]]
+ [1] 0 0 0 0 0 0 0 1 1 1
+
+[[9]]
+ [1] 0 0 0 0 0 0 0 0 1 1
+
+[[10]]
+ [1] 0 0 0 0 0 0 0 0 0 1
+```
+
+For the above example, then, the last digit in the last phase will just be that digit (mod 10 to get down to one's place, same as before).
+
+Then, the second to last digit will be the last two digits summed together (mod 10), etc.
+
+Solution thread:
+https://www.reddit.com/r/adventofcode/comments/ebf5cy/2019_day_16_part_2_understanding_how_to_come_up/
+
+In essence:
+```
+I think the best way to understand the solution is just to write out the operations for the example from part 1. Then, the pattern is obviously a backwards cumulative sum % 10.
+
+Input signal: 12345678
+
+1*1 + ... + 8*0 = 4
+1*0 + ... + 8*0 = 8
+1*0 + ... + 8*0 = 2
+1*0 + ... + 8*0 = 2
+1*0 + ... + 8*1 = 6 = (8 + 7 + 6 + 5) % 10
+1*0 + ... + 8*1 = 1 = (8 + 7 + 6) % 10
+1*0 + ... + 8*1 = 5 = (8 + 7) % 10
+1*0 + ... + 8*1 = 8 = (8) % 10
+```
+
+```{r}
+tictoc::tic("puzzle 2 time")
+
+# different tests for puzzle 2 provided
+test2 <- "03036732577212944063491565474664"
+test3 <- "02935109699940807407585447034323"
+test4 <- "03081770884921959731165446850517"
+
+puz2 <- input
+
+puz2 <- 
+  puz2 %>% 
+  rep(., 10000) %>% 
+  str_c(collapse = "") %>% 
+  str_split("") %>% 
+  pluck(1) %>% 
+  parse_integer()
+
+
+offset <- 
+  puz2[1:7] %>% 
+  str_c(collapse = "") %>% 
+  parse_integer()
+
+if (offset > (length(puz2) / 2)) cat("Offset valid for puzzle method")
+
+puz2 <- puz2[(offset + 1):length(puz2)]
+
+process_phase_puz2 <- function(.v, ...) {
+  
+  rev(.v) %>% 
+    cumsum() %>% 
+    {. %% 10} %>% 
+    rev()
+  
+}
+
+reduce(.x = 1:100, 
+       .f = process_phase_puz2, 
+       .init = puz2) %>% 
+  head(8) %>% 
+  str_c(collapse = "")
+
+tictoc::toc(log = TRUE)
+
+```
